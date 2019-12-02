@@ -9,16 +9,27 @@ class RemoteMediaResolver {
     function __construct() {
         add_action( 'init', [$this, 'resolve'] );
         add_action( 'admin_menu', [$this, 'admin_menu'], 99 );
+        add_filter( 'plugin_action_links', [$this, 'add_settings_link'], 99, 2 );
     }
 
     function admin_menu() {
-        add_options_page( 'Remote Media Resolver', 'Remote Media Resolver', 'manage_options', 'remote-media', [$this, 'settings_page'] );
+        add_options_page( 'Remote Media Resolver', 'Remote Media Resolver', 'manage_options', 'remote-media-resolver', [$this, 'settings_page'] );
+    }
+
+    function add_settings_link( $links, $file ) {
+        if ( $file == plugin_basename( __FILE__ ) ) {
+            $settings_link = '<a href="' . admin_url( 'options-general.php?page=remote-media-resolver' ) . '">Settings</a>';
+            array_unshift( $links, $settings_link );
+        }
+        return $links;
     }
 
     function settings_page() {
         if ( !current_user_can( 'manage_options' ) ) {
             wp_die( 'Unauthorized user' );
         }
+
+        $saved = false;
 
         if ( isset( $_POST['submit'] ) ) {
             check_admin_referer( 'rmr_settings' );
@@ -32,6 +43,7 @@ class RemoteMediaResolver {
             } else {
                 delete_option( 'rmr_remote_host' );
             }
+            $saved = true;
         }
 
         $remote_host_arr = get_option( 'rmr_remote_host', [] );
@@ -39,6 +51,9 @@ class RemoteMediaResolver {
         ?>
         <div class="wrap">
             <h1>Remote Media Resolver Settings</h1>
+            <?php if ( $saved ): ?>
+                <div class="notice notice-success is-dismissible"><p>Base URL updated</p></div>
+            <?php endif; ?>
             <form method="POST">
                 <?php wp_nonce_field( 'rmr_settings' ); ?>
                 <table class="form-table">
@@ -48,7 +63,7 @@ class RemoteMediaResolver {
                             <label for="remote-host">Remote Host Base URL<br/><small>(do not include content path)</small></label>
                         </th>
                         <td>
-                            <input type="text" name="remote_host" id="remote-host" value="<?php echo $remote_host; ?>" autocomplete="off">
+                            <input type="text" name="remote_host" id="remote-host" size="50" value="<?php echo $remote_host; ?>" />
                         </td>
                     </tr>
                     </tbody>
