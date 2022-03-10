@@ -47,7 +47,7 @@ class RemoteMediaResolver {
         }
 
         $remote_host_arr = get_option( 'rmr_remote_host', [] );
-        $remote_host = implode( $remote_host_arr, '.' );
+        $remote_host = implode( '.', $remote_host_arr );
         ?>
         <div class="wrap">
             <h1>Remote Media Resolver Settings</h1>
@@ -80,7 +80,7 @@ class RemoteMediaResolver {
         $remote_host_arr = get_option( 'rmr_remote_host', false );
         if ( !$remote_host_arr ) return;
 
-        $remote_host = implode( $remote_host_arr, '.' );
+        $remote_host = implode( '.', $remote_host_arr );
         $request = $_SERVER['REQUEST_URI'];
         $path = $this->get_path( $request );
         $base_path = $this->get_upload_path();
